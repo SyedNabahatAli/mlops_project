@@ -1,0 +1,11 @@
+data:
+  test_size: 0.20
+  random_state: 42
+  dataset: breast_cancer
+
+training:
+  random_state: 42
+
+selection:
+  metric: recall        # champion is chosen by highest recall
+  min_recall: 0.90      # gate: champion must exceed this threshold

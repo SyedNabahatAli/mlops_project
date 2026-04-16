@@ -1,0 +1,127 @@
+name: MLOps CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:   # allow manual trigger
+
+jobs:
+  # ── Job 1: Run the full training pipeline ───────────────────────────────────
+  train-and-select:
+    name: Train Models & Select Champion
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache pip dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+          restore-keys: ${{ runner.os }}-pip-
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Initialise DVC
+        run: |
+          dvc init --no-scm
+          echo "DVC initialised"
+
+      - name: Start MLflow tracking server (background)
+        run: |
+          mlflow server --host 127.0.0.1 --port 5000 &
+          sleep 5
+          echo "MLflow server started"
+
+      - name: Run DVC pipeline (prepare → train → select)
+        run: dvc repro
+
+      - name: Verify champion model exists
+        run: |
+          test -f models/champion_model.pkl && echo "✅ Champion model found"
+          test -f models/champion_info.json && echo "✅ Champion info found"
+          cat models/champion_info.json
+
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: champion-model
+          path: |
+            models/champion_model.pkl
+            models/champion_info.json
+
+  # ── Job 2: Run API tests ─────────────────────────────────────────────────────
+  test-api:
+    name: Test Inference API
+    runs-on: ubuntu-latest
+    needs: train-and-select
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Download champion model artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: champion-model
+          path: models/
+
+      - name: Run API tests
+        run: pytest tests/test_api.py -v
+
+  # ── Job 3: Build and push Docker image ──────────────────────────────────────
+  build-docker:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: test-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download champion model artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: champion-model
+          path: models/
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/breast-cancer-api:latest \
+            -t ${{ secrets.DOCKER_USERNAME }}/breast-cancer-api:${{ github.sha }} \
+            -f api/Dockerfile .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/breast-cancer-api:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/breast-cancer-api:${{ github.sha }}
+
+      - name: Output image details
+        run: |
+          echo "✅ Image pushed: ${{ secrets.DOCKER_USERNAME }}/breast-cancer-api:latest"
+          echo "✅ Image pushed: ${{ secrets.DOCKER_USERNAME }}/breast-cancer-api:${{ github.sha }}"

@@ -1,0 +1,38 @@
+stages:
+  prepare:
+    cmd: python src/prepare_data.py
+    deps:
+      - src/prepare_data.py
+    params:
+      - data.test_size
+      - data.random_state
+      - data.dataset
+    outs:
+      - data/raw/breast_cancer.csv
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
+
+  train:
+    cmd: python src/train_experiments.py
+    deps:
+      - src/train_experiments.py
+      - data/processed/X_train.csv
+      - data/processed/X_test.csv
+      - data/processed/y_train.csv
+      - data/processed/y_test.csv
+    params:
+      - training.random_state
+
+  select:
+    cmd: python src/select_champion.py
+    deps:
+      - src/select_champion.py
+      - src/train_experiments.py
+    params:
+      - selection.metric
+      - selection.min_recall
+    outs:
+      - models/champion_model.pkl
+      - models/champion_info.json

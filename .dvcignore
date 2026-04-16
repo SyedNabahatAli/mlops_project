@@ -1,0 +1,7 @@
+# DVC ignore file
+.git
+.github
+__pycache__
+*.pyc
+mlruns/
+mlartifacts/

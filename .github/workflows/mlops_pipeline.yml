@@ -2,9 +2,9 @@ name: MLOps CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, master]
   pull_request:
-    branches: [main]
+    branches: [main, master]
   workflow_dispatch:   # allow manual trigger
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.14"
 
       - name: Cache pip dependencies
         uses: actions/cache@v4
@@ -48,7 +48,7 @@ jobs:
 
       - name: Verify champion model exists
         run: |
-          test -f models/champion_model.pkl && echo "✅ Champion model found"
+          test -f models/champion_model && echo "✅ Champion model found"
           test -f models/champion_info.json && echo "✅ Champion info found"
           cat models/champion_info.json
 
@@ -57,7 +57,7 @@ jobs:
         with:
           name: champion-model
           path: |
-            models/champion_model.pkl
+            models/champion_model
             models/champion_info.json
 
   # ── Job 2: Run API tests ─────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ jobs:
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.14"
 
       - name: Install dependencies
         run: pip install -r requirements.txt

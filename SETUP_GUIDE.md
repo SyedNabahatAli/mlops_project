@@ -136,7 +136,7 @@ curl http://localhost:8000/health
 
 ### Option A: Docker Desktop Kubernetes
 Make sure Kubernetes is enabled in Docker Desktop settings.
-once minikube is enabled on desktop, you can proceed to test by running this on terminal:
+## once minikube is enabled on desktop, you can proceed to test by running this on terminal:
 kubectl apply -f k8s/deployment.yaml
 kubectl apply -f k8s/service.yaml
 

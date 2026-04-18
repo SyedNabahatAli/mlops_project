@@ -85,7 +85,7 @@ You will see 6 experiments:
 - KNN_Experiments
 - AdaBoost_Experiments
 
-The champion model (highest recall) is saved to `models/champion_model.pkl`.
+The champion model (highest recall) is saved to `models/champion_model`.
 
 ---
 
@@ -115,7 +115,7 @@ pytest tests/test_api.py -v
 
 ## Step 8 — Build & Run the Docker Container
 
-> Make sure the DVC pipeline has been run first so `models/champion_model.pkl` exists.
+> Make sure the DVC pipeline has been run first so `models/champion_model` exists.
 
 ```bash
 # Build the image (run from project root)
@@ -136,6 +136,9 @@ curl http://localhost:8000/health
 
 ### Option A: Docker Desktop Kubernetes
 Make sure Kubernetes is enabled in Docker Desktop settings.
+once minikube is enabled on desktop, you can proceed to test by running this on terminal:
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
 
 ### Option B: Minikube
 ```bash

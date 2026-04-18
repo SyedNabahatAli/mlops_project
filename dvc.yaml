@@ -34,5 +34,5 @@ stages:
       - selection.metric
       - selection.min_recall
     outs:
-      - models/champion_model.pkl
+      - models/champion_model
       - models/champion_info.json

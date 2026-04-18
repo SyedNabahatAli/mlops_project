@@ -36,7 +36,7 @@ SAMPLE_BENIGN = [
 
 @pytest.fixture(scope="module")
 def client():
-    """Create a TestClient — model must be present at models/champion_model.pkl"""
+    """Create a TestClient — model must be present at models/champion_model"""
     from api.main import app
     with TestClient(app) as c:
         yield c

@@ -7,7 +7,7 @@ This guide walks through running the full pipeline from scratch on a local machi
 ## Prerequisites
 
 Make sure the following are installed:
-- Python 3.11+
+- Python 3.14+
 - Docker Desktop (with Kubernetes enabled, or Minikube)
 - Git
 
@@ -18,6 +18,7 @@ Make sure the following are installed:
 ```bash
 git clone https://github.com/<your-username>/mlops_project.git
 cd mlops_project
+create virtual env and activate it
 pip install -r requirements.txt
 ```
 
@@ -58,7 +59,7 @@ This runs 3 stages automatically:
 |-------|--------|--------|
 | `prepare` | `src/prepare_data.py` | `data/raw/breast_cancer.csv`, `data/processed/*.csv` |
 | `train` | `src/train_experiments.py` | MLflow experiment runs (14 total) |
-| `select` | `src/select_champion.py` | `models/champion_model.pkl`, `models/champion_info.json` |
+| `select` | `src/select_champion.py` | `models/champion_model`, `models/champion_info.json` |
 
 To re-run only changed stages:
 ```bash

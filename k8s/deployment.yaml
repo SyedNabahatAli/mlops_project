@@ -23,7 +23,7 @@ spec:
             - containerPort: 8000
           env:
             - name: MODEL_PATH
-              value: "models/champion_model.pkl"
+              value: "models/champion_model"
             - name: INFO_PATH
               value: "models/champion_info.json"
           readinessProbe:

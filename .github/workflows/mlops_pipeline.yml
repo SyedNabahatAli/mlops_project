@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
+      - name: Set up Python 3.14
         uses: actions/setup-python@v5
         with:
           python-version: "3.14"
@@ -32,11 +32,14 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Initialise DVC
+      - name: Initialise DVC if it doesnt exist
         run: |
-          dvc init --no-scm
-          echo "DVC initialised"
-
+          if [ ! -d ".dvc" ]; then
+            dvc init --no-scm
+            echo "DVC initialised fresh"
+          else
+            echo "DVC already initialised, skipping"
+          fi
       - name: Start MLflow tracking server (background)
         run: |
           mlflow server --host 127.0.0.1 --port 5000 &
